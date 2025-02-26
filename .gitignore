@@ -1,3 +1,4 @@
+# Ignore the .vscode folder
 .vscode/
 
 # Byte-compiled / optimized / DLL files
