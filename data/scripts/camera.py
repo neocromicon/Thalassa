@@ -1,4 +1,3 @@
-import pygame
 from data.scripts.Managers.SettingsManager import SettingsManager
 from data.scripts.MapGenerator.Settings import SCREEN_HEIGHT, SCREEN_WIDTH, TILE_SIZE
 
