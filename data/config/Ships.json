@@ -1,0 +1,59 @@
+{
+    "ship_types": {
+        "S": {
+            "name": "Kleines Handelsschiff",
+            "speed": 25,
+            "storage_slots": 4,
+            "initial_goods": {
+                "tools": 20,
+                "wood": 50
+            },
+            "graphics": {
+                "N": "Ship_S_Trade_N.png",
+                "NE": "Ship_S_Trade_NE.png",
+                "E": "Ship_S_Trade_E.png",
+                "SE": "Ship_S_Trade_SE.png",
+                "S": "Ship_S_Trade_S.png",
+                "SW": "Ship_S_Trade_SW.png",
+                "W": "Ship_S_Trade_W.png",
+                "NW": "Ship_S_Trade_NW.png"
+            }
+        },
+        "M": {
+            "name": "Mittleres Handelsschiff",
+            "speed": 20,
+            "storage_slots": 8,
+            "initial_goods": {
+                "tools": 50,
+                "wood": 50,
+                "food": 25
+            },
+            "graphics": {
+                "N": "Ship_M_Trade_N.png",
+                "NE": "Ship_M_Trade_NE.png",
+                "E": "Ship_M_Trade_E.png",
+                "SE": "Ship_M_Trade_SE.png",
+                "S": "Ship_M_Trade_S.png",
+                "SW": "Ship_M_Trade_SW.png",
+                "W": "Ship_M_Trade_W.png",
+                "NW": "Ship_M_Trade_NW.png"
+            }
+        },
+        "L": {
+            "name": "Großes Handelsschiff",
+            "speed": 0.05,
+            "storage_slots": 16,
+            "initial_goods": {},
+            "graphics": {
+                "N": "Ship_L_Trade_N.png",
+                "NE": "Ship_L_Trade_NE.png",
+                "E": "Ship_L_Trade_E.png",
+                "SE": "Ship_L_Trade_SE.png",
+                "S": "Ship_L_Trade_S.png",
+                "SW": "Ship_L_Trade_SW.png",
+                "W": "Ship_L_Trade_W.png",
+                "NW": "Ship_L_Trade_NW.png"
+            }
+        }
+    }
+}

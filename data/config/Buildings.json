@@ -1,0 +1,15 @@
+{
+    "buildings": {
+        "office": {
+            "name": "Handelskontor",
+            "cost": {"wood": 20, "tools": 5},
+            "textures": {
+                "North": "Kontor_North.png",
+                "East": "Kontor_East.png",
+                "South": "Kontor_South.png",
+                "West": "Kontor_West.png"
+            },
+            "storage_slots": 8
+        }
+    }
+}

@@ -1,0 +1,60 @@
+{
+    // Haupt und PauseMenüs
+    "new_game": "New Game",
+    "continue": "Continue",
+    "empty_save_slot": "[Empty]",
+    "save_game": "Save Game",
+    "action_save_game": "Save",
+    "game_saved": "Saved",
+    "saved_slot": "Successfully saved in slot",
+    "untitled": "Untitled",
+    "load_game": "Load Game",
+    "action_load_game": "Load",
+    "select_slot": "Choose a slot",
+    "save_as": "Save as:",
+    "options": "Options",
+    "credits": "Credits",
+    "exit": "Exit",
+    // Options Menü
+    "select_video": "Video",
+    "select_mouse": "Mouse",
+    "select_keyboard": "Keyboard",
+    "back": "Back",
+    "select_language": "Language",
+    "options_title": "Options",
+    // Sprachen Menü
+    "change_lang": "Language changed to",
+    // Video Menü
+    "video_title": "Video",
+    "select_resolution": "Resolution",
+    "select_mode": "Display Mode",
+    "select_modefullscreen": "Fullscreen",
+    "select_modewindowed": "Windowed",
+    // Maus Menü
+    "mouse_title": "Mouse",
+    "mouse_sensitivity": "Sensitivity",
+    "mouse_invert": "Invert",
+    "mouse_zoom_sensitivity": "Zoom",
+    // Tastatur Menü
+    "keyboard_title": "Keyboard",
+    "keyboard_sensitivity": "Sensitivity",
+    "keyboard_invert": "Invert",
+    "keyboard_zoom_sensitivity": "Zoom",
+    // Generator Menü
+    "map_width_text": "Map Width",
+    "map_height_text": "Map Height",
+    "tree_chance": "Chance of Trees",
+    "mountain_chance": "Chance of Mountains",
+    "num_islands": "Number of Islands",
+    "seed": "Random Seed",
+    "generate_map": "Generate Map",
+    // Bestätigungsmeldungen
+    "error": "Error",
+    "no_save_onslot": "No save in slot",
+    "restart_game": "Restart game now...",
+    "change_mode": "Videomode changed!",
+    "change_resolution": "Resolution changed!",
+    "change_both_res_mode": "Videomode/Resolution changed!",
+    "on": "On",
+    "off": "Off"
+}

@@ -1,0 +1,19 @@
+{
+    "goods": {
+        "tools": {
+            "name": "Werkzeuge",
+            "texture": "tool.png",
+            "value": 50
+        },
+        "wood": {
+            "name": "Holz",
+            "texture": "wood.png",
+            "value": 10
+        },
+        "food": {
+            "name": "Nahrung",
+            "texture": "food.png",
+            "value": 5
+        }
+    }
+}

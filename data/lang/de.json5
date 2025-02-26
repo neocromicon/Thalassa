@@ -1,0 +1,61 @@
+{
+    // Haupt und PauseMenüs
+    "new_game": "Neues Spiel",
+    "continue": "Fortsetzen",
+    "empty_save_slot": "[Leer]",
+    "save_game": "Spiel Speichern",
+    "action_save_game": "Speichern",
+    "game_saved": "Gespeichert",
+    "saved_slot": "Erfolgreich gespeichert in slot",
+    "untitled": "Unbenannt",
+    "load_game": "Spiel Laden",
+    "action_load_game": "Laden",
+    "select_slot": "Wähle einen Slot",
+    "save_as": "Speichern unter:",
+    "options": "Optionen",
+    "credits": "Credits",
+    "exit": "Beenden",
+    // Options Menü
+    "select_video": "Video",
+    "select_mouse": "Maus",
+    "select_keyboard": "Tastatur",
+    "back": "Zurück",
+    "select_language": "Sprache",
+    "options_title": "Optionen",
+    // Sprachen Menü
+    "change_lang": "Sprache geändert zu",
+    // Video Menü
+    "video_title": "Video",
+    "select_resolution": "Auflösung",
+    "select_mode": "Bildschirmmodus",
+    "select_modefullscreen": "Vollbild",
+    "select_modewindowed": "Fenster",
+    // Maus Menü
+    "mouse_title": "Maus",
+    "mouse_sensitivity": "Sensivität",
+    "mouse_invert": "Invertieren",
+    "mouse_zoom_sensitivity": "Zoomen",
+    // Tastatur Menü
+    "keyboard_title": "Tastatur",
+    "keyboard_sensitivity": "Sensivität",
+    "keyboard_invert": "Invertieren",
+    "keyboard_zoom_sensitivity": "Zoomen",
+    // Generator Menü
+    "generator_title": "Karten Generator",
+    "map_width_text": "Kartenbreite",
+    "map_height_text": "Kartenhöhe",
+    "tree_chance": "Chance auf Bäume",
+    "mountain_chance": "Chance auf Berge",
+    "num_islands": "Anzahl Inseln",
+    "seed": "Zufalls-Seed",
+    "generate_map": "Karte generieren",
+    // Bestätigungsmeldungen
+    "error": "Fehler",
+    "no_save_onslot": "Kein Speicherstand in Slot",
+    "restart_game": "Spiel wird neu gestartet...",
+    "change_mode": "Bildmodus geändert!",
+    "change_resolution": "Auflösung geändert!",
+    "change_both_res_mode": "Bildmodus/Auflösung geändert!",
+    "on": "An",
+    "off": "Aus"
+}
