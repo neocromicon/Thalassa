@@ -1,3 +1,4 @@
 pygame
 json
 json5
+regex
