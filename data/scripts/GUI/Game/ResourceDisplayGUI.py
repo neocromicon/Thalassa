@@ -51,7 +51,7 @@ class ResourceDisplayGUI:
         """Berechnet die Gesamtmenge aller Waren in Kontoren und Markthäusern auf der Insel."""
         total_resources = {"tools": 0, "wood": 0, "food": 0}
 
-        for building in self.game.building_manager.buildings:
+        for building in self.game.office_manager.buildings:
             if building.get("island_id") == island_id and "warehouse" in building:
                 warehouse = building["warehouse"]
                 total_resources["tools"] += warehouse.get_quantity("tools")

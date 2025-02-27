@@ -5,9 +5,11 @@ import json
 import sys
 
 from regex import T
+from data.scripts.GUI.Game.BuildingGUI import BuildingGUI
 from data.scripts.GUI.Game.ResourceDisplayGUI import ResourceDisplayGUI
 from data.scripts.GUI.MainIngameMenu import MainIngameMenu
 from data.scripts.Managers.BuildingManager import BuildingManager
+from data.scripts.Managers.OfficeManager import OfficeManager
 from data.scripts.Managers.MouseManager import MouseManager
 from data.scripts.Managers.ShipManager import ShipManager
 from data.scripts.Managers.GoodManager import GoodManager
@@ -46,7 +48,7 @@ class Game:
         self.selection_end = None
 
         self.good_manager = GoodManager()
-        self.building_manager = None  # Erstmal None setzen
+        self.office_manager = None  # Erstmal None setzen
         self.good_manager.load_goods()
         self.resource_display = ResourceDisplayGUI(self)
         self.mouse_manager = MouseManager(self)
@@ -58,8 +60,11 @@ class Game:
         """Setzt die Tilemap nach der Generierung und spawnt mehrere Schiffe."""
         self.tilemap = tilemap
         self.camera.set_bounds(self.tilemap.bottom_right_edge)
-        self.building_manager = BuildingManager(self.tilemap)
-        self.building_manager.validate_island_ids()
+        self.office_manager = OfficeManager(self.tilemap)
+        self.office_manager.validate_island_ids()
+        self.building_manager = BuildingManager(self, self.tilemap)
+        self.building_gui = BuildingGUI(self)
+        self.renderer.load_building_textures(self.building_manager)
 
         # 🌊 **Erstes Schiff nur auf Ocean-Tiles spawnen**
         first_x, first_y = ShipManager.find_random_ocean_pixel(self.tilemap)
@@ -132,6 +137,8 @@ class Game:
                     self.pause_game = True  
                     menu = MainIngameMenu(self.screen, self)  # Erstelle eine Instanz des Ingame-Menüs
                     menu.run()
+                if event.key == pygame.K_b:  
+                    self.building_gui.show_gui = not self.building_gui.show_gui
             self.handle_mouse(event)
 
         keys = pygame.key.get_pressed()
@@ -173,14 +180,23 @@ class Game:
         if event.type in [pygame.MOUSEBUTTONDOWN, pygame.MOUSEMOTION]:
             self.show_crosshair = False
 
-        if self.building_manager.selected_ship:
-            self.building_manager.update_preview((mouse_x, mouse_y), self.camera)
+        if self.office_manager.selected_ship:
+            self.office_manager.update_preview((mouse_x, mouse_y), self.camera)
 
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            self.mouse_manager.handle_left_click(event, mouse_x, mouse_y)
-        
+        if event.type == pygame.MOUSEBUTTONDOWN:                
+            if self.building_gui.handle_click(pygame.mouse.get_pos()):
+                return
+
+            self.mouse_manager.handle_left_click(event, mouse_x, mouse_y)           
+
         elif event.type == pygame.MOUSEMOTION:  # 🆕 **Kamera bewegen**
             self.mouse_manager.handle_mouse_motion(mouse_x, mouse_y)
+            # Falls das Baumenü aktiv ist, übergebe die Mausposition an `handle_hover()`
+            if self.building_gui and self.building_gui.show_gui:
+                self.building_gui.handle_hover((mouse_x, mouse_y))
+
+            if self.building_manager.selected_building:
+                self.building_manager.update_preview((mouse_x, mouse_y), self.camera)
 
         elif event.type == pygame.MOUSEBUTTONUP:
             self.mouse_manager.handle_mouse_release(event, mouse_x, mouse_y)
@@ -195,7 +211,7 @@ class Game:
         # Aktualisiere Bau-Status für alle ausgewählten Schiffe
         if self.selected_ships:
             for ship in self.selected_ships:
-                ship.update_build_status(self.building_manager)
+                ship.update_build_status(self.office_manager)
 
     def debug_island_id_center_camera(self, screen):
         """Ermittelt die Insel-ID der Insel, die der Kameramitte am nächsten ist und visualisiert den Suchradius."""
@@ -247,10 +263,12 @@ class Game:
             ship.draw(self.screen, self.camera)
 
         # 🏗️ Gebäude rendern
-        self.building_manager.draw_buildings(self.screen, self.camera)
+        self.office_manager.draw_buildings(self.screen, self.camera)  # 🔹 Kontore rendern
+        self.building_manager.draw_buildings(self.screen, self.camera)  # 🔹 Normale Gebäude rendern
 
-        # 🏗️ Vorschau des Kontors rendern
-        self.building_manager.draw_preview(self.screen, self.camera)
+        # 🏗️ Vorschau für Bauplatz
+        self.office_manager.draw_preview(self.screen, self.camera)  # 🔹 Vorschau für Kontor
+        self.building_manager.draw_preview(self.screen, self.camera)  # 🔹 Vorschau für normale Gebäude
 
         if self.selection_active:
             # Verwende die aktuelle Mausposition, falls selection_end noch nicht gesetzt
@@ -263,49 +281,48 @@ class Game:
             )
             pygame.draw.rect(self.screen, (0, 255, 0), selection_rect, 2)
 
-            # **Schiffs-GUI rendern & Position speichern**
+        # **Kontor- und Schiffs-GUI anzeigen**
         ship_gui_y = None
         if self.selected_ships:
             ship_gui = self.selected_ships[0].gui
             ship_gui.draw(self.screen)
             ship_gui_y = ship_gui.panel_rect.top  
 
-        # **Kontor-GUI anzeigen, wenn ein Schiff in der Nähe ist**
         warehouse_gui = None
         for ship in self.selected_ships:
             warehouse_gui = ship.is_near_warehouse(return_gui=True)
             if warehouse_gui:
                 break  
 
-        # **Falls kein Schiff in der Nähe ist, aber manuell geöffnet wurde, bleibt GUI sichtbar**
         if not warehouse_gui:
-            for building in self.building_manager.buildings:
+            for building in self.office_manager.buildings:
                 if building["type"] == "office" and building["warehouse"].gui.show_gui:
                     warehouse_gui = building["warehouse"].gui
                     break
 
-        # **Kontor-GUI schließen, wenn kein Schiff aktiv ist UND sie nicht manuell geöffnet wurde**
         if not self.selected_ships:
             manually_opened_warehouse = any(
-                building["warehouse"].gui.manually_opened for building in self.building_manager.buildings
+                building["warehouse"].gui.manually_opened for building in self.office_manager.buildings
             )
-
             if not manually_opened_warehouse:
-                for building in self.building_manager.buildings:
+                for building in self.office_manager.buildings:
                     warehouse_gui = building["warehouse"].gui
                     warehouse_gui.show_gui = False 
 
-        # **Falls eine Kontor-GUI aktiv ist, zeichne sie über der Schiffs-GUI**
         if warehouse_gui and warehouse_gui.show_gui:
             warehouse_gui.draw(self.screen, ship_selected=bool(self.selected_ships), ship_gui_y=ship_gui_y)
 
-        # Nacht-Overlay anwenden
+        # 🌙 Nacht-Overlay anwenden
         night_overlay = self.time_manager.get_night_overlay(self.screen.get_size())
         self.screen.blit(night_overlay, (0, 0))
 
-        # **Baumaterialien-Anzeige rendern**
+        # 📦 Ressourcenanzeige rendern
         self.resource_display.draw(self.screen)
 
+        # 🏗️ Gebäudemenü zeichnen
+        self.building_gui.draw(self.screen)
+
+        # 🎯 Crosshair rendern
         self.draw_crosshair()
 
     def save_game(self, slot=1, save_name="Unbenannt"):

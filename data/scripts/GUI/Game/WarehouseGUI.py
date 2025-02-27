@@ -12,6 +12,9 @@ class WarehouseGUI:
 
     def handle_click(self, mouse_pos):
         """Prüft, ob ein Slot im Kontor angeklickt wurde und speichert die Auswahl."""
+        if not self.show_gui:
+            print("❌ [DEBUG] `handle_click()` wurde blockiert – `show_gui = False`!")
+            return False
         
         print(f"📌 [DEBUG] `handle_click()` wurde aufgerufen mit Mausposition: {mouse_pos}")
 

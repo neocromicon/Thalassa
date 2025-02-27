@@ -62,7 +62,7 @@ class ShipManager:
         self.warehouse.slots = {f"slot_{i}": {"good": None, "quantity": 0, "max_quantity": 50} 
                                 for i in range(num_slots)}
 
-    def update_build_status(self, building_manager):
+    def update_build_status(self, office_manager):
         """🏗 Aktualisiert, ob ein Bau möglich ist."""
         self.can_build = False  # Standard: Kann nicht bauen
 
@@ -72,7 +72,7 @@ class ShipManager:
             return  # ❌ Kein Bau möglich
 
         # 📦 2. Hat das Schiff die benötigten Ressourcen?
-        required_resources = building_manager.BUILDINGS_CONFIG['buildings']['office']['cost']
+        required_resources = office_manager.BUILDINGS_CONFIG['buildings']['office']['cost']
         has_resources = all(
             self.warehouse.get_quantity(good) >= amount
             for good, amount in required_resources.items()
@@ -81,6 +81,26 @@ class ShipManager:
         # ✅ 3. Wenn Ressourcen vorhanden & Schiff nahe genug an einer Küste -> Bau möglich
         if has_resources:
             self.can_build = True
+
+    def _is_near_warehouse_internal(self, max_distance=TILE_SIZE * 2):
+        """
+        Interne Version von is_near_warehouse(), die von anderen Funktionen genutzt werden kann,
+        ohne eine Endlosschleife zu verursachen.
+        """
+        ship_x, ship_y = self.pos_x, self.pos_y  
+
+        for building in self.game.office_manager.buildings:
+            if building["type"] == "office":
+                kontor_x, kontor_y = building["pos"]
+                kontor_x = kontor_x * TILE_SIZE + TILE_SIZE // 2  
+                kontor_y = kontor_y * TILE_SIZE + TILE_SIZE // 2
+
+                distance = ((ship_x - kontor_x) ** 2 + (ship_y - kontor_y) ** 2) ** 0.5
+
+                if distance < max_distance:
+                    return True  # ✅ Schiff ist in der Nähe eines Kontors
+
+        return False  # ❌ Kein Schiff in der Nähe
 
     def is_near_warehouse(self, max_distance=TILE_SIZE * 2, return_gui=False):
         """
@@ -93,7 +113,7 @@ class ShipManager:
         nearest_warehouse = None
         nearest_gui = None
 
-        for building in self.game.building_manager.buildings:
+        for building in self.game.office_manager.buildings:
             if building["type"] == "office":
                 kontor_x, kontor_y = building["pos"]
                 kontor_x = kontor_x * TILE_SIZE + TILE_SIZE // 2  
@@ -104,16 +124,19 @@ class ShipManager:
                 if distance < max_distance:
                     nearest_warehouse = building["warehouse"]  # ✅ WarehouseManager
                     nearest_gui = nearest_warehouse.gui  # ✅ WarehouseGUI
-                    if not nearest_gui.manually_opened:  # 🔥 GUI nur öffnen, wenn nicht manuell aktiv
+                    if not nearest_gui.manually_opened and self in self.game.selected_ships:
                         nearest_gui.show_gui = True
                     break  
 
         # **Falls das Schiff sich entfernt hat, GUI schließen (sofern nicht manuell geöffnet)**
-        for building in self.game.building_manager.buildings:
-            if building["type"] == "office":
-                warehouse_gui = building["warehouse"].gui
-                if warehouse_gui != nearest_gui and not warehouse_gui.manually_opened:
-                    warehouse_gui.show_gui = False  # 🚫 GUI schließen
+        for building in self.game.office_manager.buildings:
+            warehouse_gui = building["warehouse"].gui
+            ships_near_warehouse = any(ship._is_near_warehouse_internal() for ship in self.game.ships)
+
+            if not ships_near_warehouse and not warehouse_gui.manually_opened:
+                print("❌ [DEBUG] Kein Schiff mehr in der Nähe → WarehouseGUI wird geschlossen.")
+                warehouse_gui.show_gui = False
+
 
         return nearest_gui if return_gui else nearest_warehouse  # ✅ Je nach Modus das richtige zurückgeben
 
@@ -260,7 +283,7 @@ class ShipManager:
         print(f"🌍 Start-Tile: {start_tile}, Ziel-Tile: {target_tile}")
 
         # **Überprüfen, ob das Ziel ein Kontor ist**
-        for building in self.game.building_manager.buildings:
+        for building in self.game.office_manager.buildings:
             if building["type"] == "office" and building["pos"] == target_tile:
                 print(f"❌ Ziel {target_tile} ist ein Kontor! Verschiebe Ziel...")
 
@@ -442,19 +465,29 @@ class ShipManager:
                 dist = math.hypot(other_ship.pos_x - next_x, other_ship.pos_y - next_y)
 
                 if dist < TILE_SIZE * 0.8:
-                    print(f"🚨 {self.ship_type} stoppt, um Kollision mit {other_ship.ship_type} zu vermeiden.")
+                    if is_in_group:
+                        print(f"🚨 {self.ship_type} stoppt, um Kollision mit {other_ship.ship_type} in Formation zu vermeiden.")
 
-                    # **Starte Stop-Timer, wenn Schiff blockiert ist**
-                    if self.stop_timer is None:
-                        self.stop_timer = current_time  # Timer starten
+                        # **Starte Stop-Timer, wenn Schiff blockiert ist**
+                        if self.stop_timer is None:
+                            self.stop_timer = current_time  # Timer starten
 
-                    # **Falls das Schiff 100ms blockiert war, leere die Ziel-Queue**
-                    elif current_time - self.stop_timer >= 100:
-                        print(f"⏳ {self.ship_type} hat sich 100ms nicht bewegt, stoppt Bewegung.")
-                        self.target_queue.clear()
-                        self.velocity_x, self.velocity_y = 0, 0
-                        self.stop_timer = None
-                    return  
+                        # **Falls das Schiff 100ms blockiert war, leere die Ziel-Queue**
+                        elif current_time - self.stop_timer >= 200:
+                            print(f"⏳ {self.ship_type} hat sich 200ms nicht bewegt, stoppt Bewegung.")
+                            self.target_queue.clear()
+                            self.velocity_x, self.velocity_y = 0, 0
+                            self.stop_timer = None
+                        return  
+
+                    else:
+                        # 🚢 **Einzelschiff darf durch andere Schiffe hindurchfahren**
+                        print(f"⚠️ {self.ship_type} fährt durch {other_ship.ship_type} hindurch.")
+                        break  # **Nicht stoppen, sondern einfach weiterfahren**
+
+        # **Falls das Schiff sich bewegt hat, Timer zurücksetzen**
+        if (self.pos_x, self.pos_y) != self.last_position:
+            self.stop_timer = None  # Timer löschen
 
         # **3️⃣ Falls das Schiff sich bewegt hat, Timer zurücksetzen**
         if (self.pos_x, self.pos_y) != self.last_position:
@@ -471,11 +504,11 @@ class ShipManager:
 
     def start_build_office(self):
         """Aktiviert den Bau-Modus für das Kontor."""
-        if not self.game.building_manager:
+        if not self.game.office_manager:
             return
         
         print("🏗️ Baumenü für Kontor gestartet!")  # Debugging-Ausgabe
-        self.game.building_manager.start_building_office(self)
+        self.game.office_manager.start_building_office(self)
 
     def transfer_to_warehouse(self, warehouse, slot_index):
         """Transferiert eine Ware vom Schiff ins Kontor der aktuellen Insel."""

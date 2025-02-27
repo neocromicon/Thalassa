@@ -18,9 +18,13 @@ class MouseManager:
             ship_gui = None
             clicked_ship = None
             clicked_warehouse = None  
+            
+            if self.game.building_gui.build_button_rect.collidepoint(mouse_x, mouse_y):
+                self.game.building_gui.toggle_gui()
+                return
 
             # 📌 **Prüfe, ob auf ein Kontor geklickt wurde (nun mit Insel-ID!)**
-            for building in self.game.building_manager.buildings:
+            for building in self.game.office_manager.buildings:
                 if building["type"] == "office":
                     kontor_x, kontor_y = building["pos"]
                     screen_x, screen_y = self.game.camera.apply((kontor_x * TILE_SIZE, kontor_y * TILE_SIZE))
@@ -32,7 +36,7 @@ class MouseManager:
 
             # **Falls ein Kontor geklickt wurde, alle anderen schließen**
             if clicked_warehouse:
-                for building in self.game.building_manager.buildings:
+                for building in self.game.office_manager.buildings:
                     warehouse_gui = building["warehouse"].gui
                     if warehouse_gui != clicked_warehouse:  # ❌ Alle anderen schließen
                         warehouse_gui.show_gui = False
@@ -42,18 +46,31 @@ class MouseManager:
                 clicked_warehouse.manually_opened = True  
                 return  
 
-            # **Falls kein Schiff oder Kontor angeklickt wurde → Schließe GUI**
-            if not self.game.selected_ships:
-                for building in self.game.building_manager.buildings:
+            if not self.game.selected_ships and not clicked_warehouse:  
+                clicked_inside_gui = False  # ✅ Prüfen, ob der Klick innerhalb einer WarehouseGUI war
+
+                for building in self.game.office_manager.buildings:
                     warehouse_gui = building["warehouse"].gui
-                    if warehouse_gui.show_gui and warehouse_gui.manually_opened:
-                        warehouse_gui.show_gui = False  
-                        warehouse_gui.manually_opened = False  
-                        print("❌ Klick in die Welt → Manuell geöffnete Kontor-GUI geschlossen.")
+
+                    if warehouse_gui.show_gui and hasattr(warehouse_gui, "panel_rect"):
+                        print(f"📌 [DEBUG] Prüfe Klick-Kollision mit WarehouseGUI: {warehouse_gui.panel_rect}")
+                        if warehouse_gui.panel_rect.collidepoint(mouse_x, mouse_y):  # ✅ Klick auf GUI
+                            clicked_inside_gui = True
+                            print("📌 [DEBUG] Klick innerhalb der WarehouseGUI erkannt!")
+                            break  # **Schleife sofort verlassen, wenn GUI erkannt wurde**
+
+                # ✅ Falls der Klick NICHT in der GUI war, schließe sie
+                if not clicked_inside_gui:
+                    for building in self.game.office_manager.buildings:
+                        warehouse_gui = building["warehouse"].gui
+                        if warehouse_gui.show_gui and warehouse_gui.manually_opened:
+                            print("❌ [DEBUG] Klick außerhalb der WarehouseGUI → GUI wird geschlossen.")
+                            warehouse_gui.show_gui = False  
+                            warehouse_gui.manually_opened = False  
 
             # 🏗 Falls ein Gebäude aktiv ist, platziere es
-            if self.game.building_manager.selected_ship:
-                self.game.building_manager.place_office()
+            if self.game.office_manager.selected_ship:
+                self.game.office_manager.place_office()
                 return
 
             # **Falls ein Schiff in der Nähe eines Kontors ist → `warehouse_gui` abrufen**
@@ -64,10 +81,13 @@ class MouseManager:
                     break  
 
             # **Falls auf die Kontor-GUI geklickt wurde**
-            if warehouse_gui and warehouse_gui.panel_rect.collidepoint(mouse_x, mouse_y):
-                print("📌 Klick in der WarehouseGUI erkannt – Schiff bleibt ausgewählt.")
-                warehouse_gui.handle_click((mouse_x, mouse_y))  
-                return  
+            if warehouse_gui and warehouse_gui.show_gui:
+                if hasattr(warehouse_gui, "panel_rect") and warehouse_gui.panel_rect.width > 0:
+                    print(f"📌 [DEBUG] WarehouseGUI wird überprüft – Panel Position: {warehouse_gui.panel_rect.x}, {warehouse_gui.panel_rect.y}")
+                    if warehouse_gui.panel_rect.collidepoint(mouse_x, mouse_y):
+                        print("📌 Klick in der WarehouseGUI erkannt – bleibt geöffnet.")
+                        warehouse_gui.handle_click((mouse_x, mouse_y))
+                        return
 
             # **Falls auf die Schiff-GUI geklickt wurde, Auswahl nicht aufheben**
             for ship in self.game.ships:
@@ -103,15 +123,20 @@ class MouseManager:
                 self.game.selection_start = (mouse_x, mouse_y)
                 self.game.selection_active = True
 
-        elif event.button == 3 and self.game.building_manager.selected_ship:
+            if self.game.building_manager.selected_building:
+                self.game.building_manager.place_building()
+                return 
+
+        elif event.button == 3 and self.game.office_manager.selected_ship:
             print("❌ Bau-Modus abgebrochen!")
-            self.game.building_manager.cancel_building()
+            self.game.office_manager.cancel_building()
             return
         elif event.button == 3:  # **Rechtsklick → Kamera bewegen ODER Schiffe bewegen**
             self.right_click_start_time = pygame.time.get_ticks()
             self.last_mouse_pos = pygame.mouse.get_pos()
             self.right_click_held = True
             self.camera_moved = False  
+            self.game.building_manager.cancel_building()
         elif event.button in [4, 5]:  # Mausrad nach oben/unten
                 zoom_amount = 1 if event.button == 4 else -1
                 self.game.camera.apply_zoom(zoom_amount, mouse_x, mouse_y)
@@ -143,7 +168,7 @@ class MouseManager:
 
             self.game.selection_active = False  
 
-        elif event.button == 3 and self.game.building_manager.selected_ship:
+        elif event.button == 3 and self.game.office_manager.selected_ship:
             return  # Falls ein Gebäude gebaut wird, bricht Rechtsklick nur den Bau ab.
 
         elif event.button == 3:  # **Rechtsklick loslassen = Schiffe bewegen**

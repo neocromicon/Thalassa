@@ -84,6 +84,13 @@ class Renderer:
     def load_ocean_anim(self):
         return [pygame.image.load(os.path.join(TILE_PATH, "Ocean_Ani", frame)) for frame in OCEAN_ANIM_FRAMES]
     
+    def load_building_textures(self, building_manager):
+        """Lädt alle Gebäudetexturen aus dem BuildingManager und speichert sie in `self.tiles`."""
+        for key, texture in building_manager.textures.items():
+            if key not in self.tiles:  # Falls die Textur noch nicht geladen wurde
+                self.tiles[key] = texture
+                print(f"🔄 Gebäude-Textur für {key} geladen")
+
     def get_visible_area(self, camera, tilemap, screen_width, screen_height):
         """Berechnet den sichtbaren Bereich basierend auf Tile-Koordinaten mit genauerem Culling."""
         tile_size = max(1, round(TILE_SIZE * camera.zoom))  # Korrigierte Tile-Größe mit Zoom

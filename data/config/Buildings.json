@@ -10,6 +10,30 @@
                 "West": "Kontor_West.png"
             },
             "storage_slots": 8
+        },
+        "lumberjack": {
+            "name": "Holzfäller",
+            "category": "raw_materials",
+            "cost": {"wood": 5, "tools": 2},
+            "texture": "Lumberjack.png"
+        },
+        "ore_mine": {
+            "name": "Erzmine",
+            "category": "raw_materials",
+            "cost": {"wood": 8, "tools": 3},
+            "texture": "Ore_Mine.png"
+        },
+        "wheatfarm": {
+            "name": "Weizenfarm",
+            "category": "production",
+            "cost": {"wood": 10, "tools": 4},
+            "texture": "Wheatfarm.png"
+        },
+        "sheepfarm": {
+            "name": "Schafsfarm",
+            "category": "production",
+            "cost": {"wood": 12, "tools": 3},
+            "texture": "Sheepfarm.png"
         }
     }
 }
