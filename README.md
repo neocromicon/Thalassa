@@ -45,29 +45,26 @@
    python main.py
    ```
 
-## 💡 Contributing
-If you're interested in contributing, feel free to fork the project, make improvements, and submit a pull request!
+## 📜 Thalassa License
 
-## 📜 Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
+## 1. License Grant
+This license allows individuals to **play** the game *Thalassa* for free while it is in development.  
+Once the game is officially released, it will be available for purchase.
 
-This work is licensed under a **Creative Commons Attribution-NonCommercial 4.0 International License**.
+## 2. Usage Restrictions
+- You **may** download and play the game.
+- You **may not** modify, distribute, or create derivative works based on the game.
+- You **may not** use any part of the game's code, assets, or content for personal or commercial projects.
+- You **may not** re-upload the game to any platform or claim it as your own.
 
-## ✅ You are free to:
-- **Share** – Copy and redistribute the material in any medium or format.
-- **Adapt** – Remix, transform, and build upon the material.
+## 3. Commercial Release
+Upon the official release of *Thalassa*, access to the free version may be removed from GitHub.  
+The game will then be available for purchase under separate terms.
 
-## ❌ Under the following conditions:
-- **Attribution** – You must give appropriate credit, provide a link to the license, and indicate if changes were made.
-- **NonCommercial** – You may **not** use the material for **commercial purposes**.
-- **No additional restrictions** – You may not apply legal terms or technological measures that legally restrict others from doing anything the license permits.
+## 4. No Warranty
+This game is provided "as is," without any warranties of any kind. The developers are not responsible for any issues arising from its use.
 
-## 📜 Full License
-You can read the full license here:  
-[Creative Commons License](https://creativecommons.org/licenses/by-nc/4.0/)
-
-## ⚠ Important Notes:
-- You may **not sell** this game or use it for commercial projects.
-- You **can modify and share it**, but **only for free**.
-- If you want to use this project commercially, you **must obtain permission** from the author.
+## 5. Contact
+For inquiries regarding licensing, please contact the developers via the official GitHub repository.
 
 © 2025 neocromicon
